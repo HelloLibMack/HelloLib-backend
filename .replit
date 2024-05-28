@@ -1,0 +1,33 @@
+run = "mvn spring-boot:run"
+entrypoint = "src/main/java/Main.java"
+hidden = ["**/*.class"]
+
+[packager]
+language = "java"
+
+[packager.features]
+packageSearch = true
+
+[languages.java]
+pattern = "**/*.java"
+
+[languages.java.languageServer]
+start = "jdt-language-server"
+
+[unitTest]
+language = "java"
+
+[nix]
+channel = "stable-22_11"
+
+[[ports]]
+localPort = 8080
+externalPort = 80
+
+[env]
+SERVER_TOMCAT_ACCEPT_COUNT="3"
+SERVER_TOMCAT_MAX_CONNECTIONS="3"
+SERVER_TOMCAT_THREADS_MAX="3"
+SERVER_TOMCAT_THREADS_MIN_SPARE="1"
+SPRING_MAIN_LAZY_INITIALIZATION="true"
+JAVA_TOOL_OPTIONS="-XX:+UseSerialGC -Xss512k -XX:MaxRAM=200m"

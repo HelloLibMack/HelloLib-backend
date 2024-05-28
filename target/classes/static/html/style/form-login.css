@@ -1,0 +1,66 @@
+.form-login{
+    width: 300px;
+    padding: 20px;
+    margin: auto;
+    background-color: #fff; /* Fundo branco */
+    box-shadow: 0px 4px 8px rgba(0,0,0,.1); /* Efeito de sombra */
+    border-radius: 8px; /* Cantos arredondados */
+    text-align: center;
+}
+.form-login h2 {
+    margin-bottom: 20px;
+    color: #333; /* Texto escuro para visibilidade */
+}
+input[type=text], input[type=password], input[type=date], select{
+    width: calc(100% - 20px);
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+.login-button {
+    background-color: #E74C3C; /* Fundo vermelho */
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.login-button:hover {
+    background-color: #C0392B; /* Tom de vermelho mais escuro para efeito de hover */
+}
+.secondary-button {
+    background: none;
+    color: #E74C3C; /* Texto vermelho */
+    padding: 10px;
+    border: none;
+    cursor: pointer;
+}
+
+.login-container{
+    margin-top: 30px;
+    width: 50%;
+    background-color: #FFCBED;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    margin-bottom: 30px;
+}
+
+.login-container img{
+    max-width: 450px;
+}
+
+.submit-button {
+    background-color: #45D164; /* Fundo verde */
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.submit-button:hover {
+    background-color: #50b365; /* Tom de verde mais escuro para efeito de hover */
+}
+

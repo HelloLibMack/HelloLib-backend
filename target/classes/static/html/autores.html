@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <title>Autores</title>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="style/form-login.css">
+        <link rel="stylesheet" href="style/form-cadastro.css">
+        <link rel="stylesheet" href="style/header.css">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    </head>
+    <style>
+        body{display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        width: 100%;}
+    </style>
+    <body>
+
+        <header>
+            <img src="img/logo_pequena.png" alt="Company Logo">
+            <nav>
+              <ul>
+                <li><a href="livros.html">Livros</a></li>
+                <li><a href="editoras.html">Editoras</a></li>
+                <li><a href="autores.html">Autores</a></li>
+              </ul>
+            </nav>
+            <button class="sair" onclick="logout()">Sair</button>
+          </header>
+             <div class="formCadastro-container">
+            <h2>Gerenciamento de Autores</h2>
+            <div class="form-cadastro">
+                <input type="text" placeholder="ID" id="id">
+                <input type="text" placeholder="Nome" id="nome">
+                <label>Data de Nascimento</label>
+                <input type="date" id="dataNascimento">
+                <input type="text" placeholder="Nacionalidade" id="nacionalidade">
+                <label>Sexo</label>
+                <select id="sexo">
+                    <option value="Homem">Homem</option>
+                    <option value="Homem">Mulher</option>
+                </select>
+                <div class="button-container">
+                    <button onclick="novoAutor()" id="btnNovo">Cadastrar</button>
+                    <button onclick="salvarAutor()" id="btnSalvar">Atualizar</button>
+                    <button onclick="apagarAutor()" id="btnApagar">Deletar</button>
+                    <button onclick="cancelarEdicao()" id="btnCancelar">Cancelar</button>
+                </div>
+            </div>
+        </div>
+        
+
+
+        <p style="font-weight:bold" id="paragrafoMensagem"></p>
+
+        <table class="table" style="width: 80%;">    
+            <tr> <th>ID</th> <th>Nome</th> <th>Data de Nascimento</th> <th>Nacionalidade</th> <th>Sexo</th> </tr>   
+                                           
+            <tbody id="corpoTabelaAutores"> </tbody>
+        </table>
+        
+        
+        <script>
+        
+var token = localStorage.getItem('token');
+if (!token) {
+	window.location.replace("/html/login.html");
+}
+const txtId = document.querySelector('#id');
+const corpoTabela = document.querySelector('#corpoTabelaAutores');
+const paragrafoMensagem = document.querySelector('#paragrafoMensagem');
+const txtNome = document.querySelector('#nome');
+const txtDtNascimento = document.querySelector('#dataNascimento');
+const txtNacionalidade = document.querySelector('#nacionalidade');
+const txtSexo = document.querySelector('#sexo');
+const btnNovo = document.querySelector('#btnNovo');
+const btnSalvar = document.querySelector('#btnSalvar');
+const btnApagar = document.querySelector('#btnApagar');
+const btnCancelar = document.querySelector('#btnCancelar');
+var criandoNovoAutor = false;
+inicializar();
+
+function inicializar() {
+    paragrafoMensagem.innerHTML =  '';
+    txtId.value = '';
+    txtNome.value = '';
+    txtNacionalidade.value = '';
+    txtDtNascimento.value = '';
+    txtNacionalidade.value='';
+    txtId.disabled = true;
+    criandoNovoAutor = false;
+    listarTodosAutores();
+
+}
+
+
+
+async function listarTodosAutores() {
+	fetch('/api/autores' ,{
+        method: 'GET',
+        headers: {'Authorization': 'Bearer ' + token }
+    })
+    .then(resposta => { if (!resposta.ok) throw Error(resposta.status); return resposta; } )
+    .then(resposta => resposta.json())
+    .then(json => preencherTabela(json))
+    .catch(function(error) {
+        paragrafoMensagem.innerHTML = "Erro ao listar autores (código " + error.message + ")";
+    });
+}
+
+function preencherTabela(autores) {
+	var linhasTabela = '';
+	var n = autores.length;
+	for (var i=0; i<n; i++) {
+		var p = autores[i];
+		linhasTabela += 
+			`<tr> ` + 
+            `<td><a href="javascript:void(0)" onclick="selecionarAutor('${p.id}', '${p.nome}', '${p.nacionalidade}', '${p.dtNascimento}', '${p.sexo}')">${p.id}</a></td>`
+             + ` <td>${p.nome}</td> <td>${p.dtNascimento}</td> <td>${p.nacionalidade}</td> <td>${p.sexo}</td></tr> \n`;
+	}
+	corpoTabela.innerHTML = linhasTabela;
+}
+
+function novoAutor() {
+    fetch('/api/autores', {
+            method: 'POST',
+            body: JSON.stringify({
+                'nome': txtNome.value,
+                'dtNascimento': txtDtNascimento.value,
+                'nacionalidade': txtNacionalidade.value,
+                'sexo' : txtSexo.value,
+            }),
+            headers: {
+            	'Content-type': 'application/json',
+            	'Authorization': 'Bearer ' + token
+            }
+        })
+        .then(resposta => { if (!resposta.ok) throw Error(resposta.status); return resposta; } )
+        .then(resposta => resposta.json())
+        .then(json => inicializar())
+        .catch(function(error) {
+            paragrafoMensagem.innerHTML = "Erro ao criar autor (código " + error.message + ")";
+        });  
+}
+
+async function salvarAutor() {
+        fetch('/api/autores/' + txtId.value, {
+            method: 'PUT',
+            body: JSON.stringify({
+                'id': txtId.value,
+                'nome': txtNome.value,
+                'dtNascimento': txtDtNascimento.value,
+                'nacionalidade': txtNacionalidade.value,
+                'sexo' : txtSexo.value,
+            }),
+            headers: {
+            	'Content-type': 'application/json',
+            	'Authorization': 'Bearer ' + token
+            }
+        })
+        .then(resposta => { if (!resposta.ok) throw Error(resposta.status); return resposta; } )
+        .then(resposta => resposta.json())
+        .then(json => inicializar())
+        .catch(function(error) {
+            paragrafoMensagem.innerHTML = "Erro ao alterar autor (código " + error.message + ")";
+        });         
+    
+}
+
+function cancelarEdicao() {
+	inicializar();
+}
+
+function selecionarAutor(id, nome, nacionalidade, dataNascimento, sexo) {
+    paragrafoMensagem.innerHTML = 'Altere e salve os dados do autor, ou então apague o registro do autor.'
+    txtId.value = id;
+    txtNome.value = nome;
+    txtDtNascimento.value = dataNascimento;
+    txtNacionalidade.value = nacionalidade;
+    txtSexo.value = sexo;
+    txtId.disabled = true;
+    txtDtNascimento.disabled = false;
+    txtNacionalidade.disabled = false;
+    btnNovo.disabled = true;
+    btnSalvar.disabled = false;
+    btnApagar.disabled = false;
+    btnCancelar.disabled = false; 
+}
+
+async function apagarAutor() {
+	fetch('/api/autores/' + txtId.value, {
+        method: 'DELETE',
+        headers: {'Authorization': 'Bearer ' + token }
+    })
+    .then(resposta => { if (!resposta.ok) throw Error(resposta.status); return resposta; } )
+    .then(resposta => inicializar())
+    .catch(function(error) {
+        paragrafo.innerHTML = "Erro ao apagar autor (código " + error.message + ")";
+    });
+}
+
+function logout() {
+	localStorage.removeItem('token');
+	window.location.replace("/html/login.html");
+}
+
+        </script>
+	</body>
+</html>	        

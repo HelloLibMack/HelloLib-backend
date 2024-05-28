@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Login</title>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="style/form-login.css">
+    </head>
+    <style>
+      body{display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      width: 100%;}
+  </style>
+<body>
+  <div class="login-container">
+    <img src="img/logo_grande.png" alt="Company Logo">
+    <div class="form-login" action="">
+        <h2>Login</h2>
+        <input type="text" placeholder="Email" id="username">
+        <input type="password" placeholder="Senha" id="password">
+        <button class="login-button" onclick="getToken()">Login</button>
+        <a class="secondary-button" href="cadastro.html">Cadastre-se</a>
+    </div>
+  </div>
+  <div id="message"></div>
+
+  <script src="/js/jwt-vanilla.js"></script>
+</body>
+</html>

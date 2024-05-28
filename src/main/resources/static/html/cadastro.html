@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Cadastro</title>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="style/form-login.css">
+    </head>
+    <style>
+      body{display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      width: 100%;}
+  </style>
+<body>
+  <div class="login-container">
+    <img src="img/logo_grande.png" alt="Company Logo">
+    <div class="form-login" action="">
+        <h2>Login</h2>
+        <input type="text" placeholder="Nome" id="nome">
+        <input type="text" placeholder="Telefone" id="telefone">
+        <input type="text" placeholder="Email" id="username">
+        <input type="password" placeholder="Senha" id="password">
+        <button class="submit-button" onclick="cadastrar()">Enviar</button>
+        <a class="secondary-button" href="login.html">Login</a>
+    </div>
+  </div>
+  <div id="message"></div>
+
+  <script>
+    function formatarTelefone(telefone) {
+    // Remove caracteres não numéricos
+    telefone = telefone.replace(/\D/g, '');
+
+    // Limita o tamanho do telefone para 11 dígitos (2 dígitos do DDD + 9 do número)
+    telefone = telefone.substring(0, 11);
+
+    // Adiciona a pontuação para o formato de telefone
+    telefone = telefone.replace(/^(\d{2})(\d)/g, '($1) $2');
+    telefone = telefone.replace(/(\d{4})(\d)/, '$1-$2');
+    telefone = telefone.replace(/(\d{5})(\d)/, '$1-$2');
+
+    return telefone;
+}
+
+document.querySelector('#telefone').addEventListener('input', function (e) {
+    e.target.value = formatarTelefone(e.target.value);
+});
+
+function validarFormatoTelefone(telefone) {
+    // Expressão regular para validar o formato do telefone
+    const regexTelefone = /^\(\d{2}\)\s(?:\d{4}-\d{4}|\d{5}-\d{4})$/;
+    return regexTelefone.test(telefone);
+}
+
+document.querySelector('#telefone').addEventListener('input', function (e) {
+    const telefone = formatarTelefone(e.target.value);
+    if (!validarFormatoTelefone(telefone) || telefone.length < 14) {
+        e.target.classList.add('telefone-invalido');
+        e.target.title = 'Telefone não segue o formato correto';
+    } else {
+        e.target.classList.remove('telefone-invalido');
+        e.target.title = '';
+    }
+    e.target.value = telefone;
+});
+
+
+
+var messageElement = document.getElementById('message');
+var userElement = document.getElementById('username');
+var passwordElement = document.getElementById('password');
+var nomeElement = document.getElementById('nome');
+    var telefoneElement = document.getElementById('telefone');
+
+async function cadastrar() {
+    fetch('/register', {
+        method: 'POST',
+        body: JSON.stringify({
+            'username': userElement.value,
+            'password': passwordElement.value,
+            'nome' : nomeElement.value,
+          'telefone' : telefoneElement.value
+        }),
+        headers: {
+        	'Content-type': 'application/json'
+        }
+    })
+    .then(resposta => { if (!resposta.ok) throw Error(resposta.status); return resposta; } )
+    .then(resposta => resposta.json())
+    .then(json => {
+    	if (json.username == userElement.value) {
+    		alert('Usuário criado com sucesso! Faça agora o login na aplicação...')
+    		window.location.replace("/html/login.html");
+    	}
+    	else {
+    		messageElement.innerHTML = "Erro ao criar novo usuário";
+    	}
+    })
+    .catch(function(error) {
+        messageElement.innerHTML = "Erro ao criar novo usuário (código " + error.message + ")";
+    }); 
+}
+  </script>
+</body>
+</html>

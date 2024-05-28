@@ -1,0 +1,16 @@
+br/mackenzie/webapp/security/service/JwtUserDetailsService.class
+br/mackenzie/webapp/professor/ProfessorController.class
+br/mackenzie/webapp/WebApp.class
+br/mackenzie/webapp/security/config/JwtRequestFilter.class
+br/mackenzie/webapp/security/config/WebSecurityConfig.class
+br/mackenzie/webapp/professor/Professor.class
+br/mackenzie/webapp/security/dao/UserDao.class
+br/mackenzie/webapp/security/model/DAOUser.class
+br/mackenzie/webapp/security/model/JwtRequest.class
+br/mackenzie/webapp/security/model/JwtResponse.class
+br/mackenzie/webapp/security/config/JwtAuthenticationEntryPoint.class
+br/mackenzie/webapp/security/controller/HelloWorldController.class
+br/mackenzie/webapp/security/model/UserDTO.class
+br/mackenzie/webapp/security/config/JwtTokenUtil.class
+br/mackenzie/webapp/professor/ProfessorRepo.class
+br/mackenzie/webapp/security/controller/JwtAuthenticationController.class

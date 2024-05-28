@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <title>Livros</title>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="style/form-login.css">
+        <link rel="stylesheet" href="style/form-cadastro.css">
+        <link rel="stylesheet" href="style/header.css">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    </head>
+    <style>
+        body{display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        width: 100%;}
+    </style>
+    <body>
+
+        <header>
+            <img src="img/logo_pequena.png" alt="Company Logo">
+            <nav>
+              <ul>
+                <li><a href="livros.html">Livros</a></li>
+                <li><a href="editoras.html">Editoras</a></li>
+                <li><a href="autores.html">Autores</a></li>
+              </ul>
+            </nav>
+            <button class="sair" onclick="logout()">Sair</button>
+          </header>
+             <div class="formCadastro-container">
+            <h2>Gerenciamento de Livros</h2>
+            <div class="form-cadastro">
+                <input type="text" placeholder="ID" id="id">
+                <input type="text" placeholder="Título" id="titulo">
+                <input type="text" placeholder="Ano" id="ano">
+                <input type="text" placeholder="Público Alvo" id="pub">
+                <input type="text" placeholder="Genero" id="genero">
+                <label>Editora</label>
+                <select id="select-field">
+                    <option value="">Selecione...</option>
+                </select>
+                <label>Autor</label>
+                <select id="select-autor">
+                    <option value="">Selecione...</option>
+                </select>
+                <div class="button-container">
+                    <button onclick="novoLivro()" id="btnNovo">Cadastrar</button>
+                    <button onclick="salvarLivro()" id="btnSalvar">Atualizar</button>
+                    <button onclick="apagarLivro()" id="btnApagar">Deletar</button>
+                    <button onclick="cancelarEdicao()" id="btnCancelar">Cancelar</button>
+                </div>
+            </div>
+        </div>
+        
+
+
+        <p style="font-weight:bold" id="paragrafoMensagem"></p>
+
+        <table class="table" style="width: 80%;">    
+            <tr> <th>ID</th> <th>Título</th> <th>Autor</th> <th>Gênero</th> <th>Editora</th> <th>Público Alvo</th> <th>Ano Publicacao</th>  </tr>   
+                                           
+            <tbody id="corpoTabelaLivros"> </tbody>
+        </table>
+        
+        
+        <script>
+        
+var token = localStorage.getItem('token');
+if (!token) {
+	window.location.replace("/html/login.html");
+}
+try{
+    const selectField = document.querySelector('#select-field');
+
+fetch('/api/editoras' ,{
+    method: 'GET',
+    headers: {'Authorization': 'Bearer ' + token }
+})
+.then(response => response.json())
+.then(data => {
+const options = data.map(item => {
+  return `<option value="${item.id}">${item.nome}</option>`;
+});
+
+selectField.innerHTML = options.join('');
+
+
+})
+}catch(ex){
+    console.log(ex);
+}
+
+try{
+    const selectAutor = document.querySelector('#select-autor');
+
+fetch('/api/autores' ,{
+    method: 'GET',
+    headers: {'Authorization': 'Bearer ' + token }
+})
+.then(response => response.json())
+.then(data => {
+const options = data.map(item => {
+  return `<option value="${item.id}">${item.nome}</option>`;
+});
+
+selectAutor.innerHTML = options.join('');
+
+
+})
+}catch(ex){
+    console.log(ex);
+}
+
+
+const txtId = document.querySelector('#id');
+const corpoTabela = document.querySelector('#corpoTabelaLivros');
+const paragrafoMensagem = document.querySelector('#paragrafoMensagem');
+const txtTitulo = document.querySelector('#titulo');
+const txtAno = document.querySelector('#ano');
+const txtPublicoAlvo = document.querySelector('#pub');
+const txtAutor = document.querySelector('#select-autor');
+const txtGenero = document.querySelector('#genero');
+const txtEditora = document.querySelector('#select-field');
+const btnNovo = document.querySelector('#btnNovo');
+const btnSalvar = document.querySelector('#btnSalvar');
+const btnApagar = document.querySelector('#btnApagar');
+const btnCancelar = document.querySelector('#btnCancelar');
+var criandoNovoLivro = false;
+inicializar();
+
+function inicializar() {
+    paragrafoMensagem.innerHTML =  'Cadastre ou selecione um livro da lista:';
+    txtId.value = '';
+    txtTitulo.value = '';
+    txtPublicoAlvo.value = '';
+    txtAno.value = '';
+    txtGenero.value='';
+    txtEditora.value = '';
+    txtId.disabled = true;
+    criandoNovoLivro = false;
+    listarTodosLivros();
+    
+}
+
+async function listarTodosLivros() {
+	fetch('/api/livros' ,{
+        method: 'GET',
+        headers: {'Authorization': 'Bearer ' + token }
+    })
+    .then(resposta => { if (!resposta.ok) throw Error(resposta.status); return resposta; } )
+    .then(resposta => resposta.json())
+    .then(json => preencherTabela(json))
+    .catch(function(error) {
+        paragrafoMensagem.innerHTML = "Erro ao listar livros (código " + error + ")";
+    });
+}
+
+function preencherTabela(livros) {
+	var linhasTabela = '';
+	var n = livros.length;
+	for (var i=0; i<n; i++) {
+		var p = livros[i];
+		linhasTabela += 
+			`<tr> ` + 
+            `<td><a href="javascript:void(0)" onclick="selecionarLivro('${p.id}', '${p.titulo}', '${p.publicoAlvo}', '${p.ano}', '${p.editora.id}', '${p.genero}', ${p.autor.id})">${p.id}</a></td>`
+             + ` <td>${p.titulo}</td> <td>${p.autor.nome}</td> <td>${p.genero}</td> <td>${p.editora.nome}</td> <td>${p.publicoAlvo}</td> <td>${p.ano}</td></tr> \n`;
+	}
+	corpoTabela.innerHTML = linhasTabela;
+}
+
+async function novoLivro() {
+    let jsonEditora;
+    try {
+        const responseEditora = await fetch('/api/editoras/' + txtEditora.value, {
+            method: 'GET',
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
+        jsonEditora = await responseEditora.json();
+    } catch (error) {
+        console.error('Erro ao buscar editora:', error);
+        return;
+    }
+
+    let jsonAutor;
+    try {
+        const responseAutor = await fetch('/api/autores/' + txtAutor.value, {
+            method: 'GET',
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
+        jsonAutor = await responseAutor.json();
+    } catch (error) {
+        console.error('Erro ao buscar autor:', error);
+        return;
+    }
+
+    const requestBody = JSON.stringify({
+        'titulo': txtTitulo.value,
+        'ano': txtAno.value,
+        'publicoAlvo': txtPublicoAlvo.value,
+        'genero': txtGenero.value,
+        'editora': jsonEditora,
+        'autor': jsonAutor
+    });
+
+    try {
+        const responseLivro = await fetch('/api/livros', {
+            method: 'POST',
+            body: requestBody,
+            headers: {
+                'Content-type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            }
+        });
+        if (!responseLivro.ok) throw Error(responseLivro.status);
+        await responseLivro.json();
+        inicializar();
+    } catch (error) {
+        paragrafoMensagem.innerHTML = "Erro ao criar livro (código " + error.message + ")";
+    }
+}
+
+async function salvarLivro() {
+   
+    let jsonEditora;
+    try {
+        const responseEditora = await fetch('/api/editoras/' + txtEditora.value, {
+            method: 'GET',
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
+        jsonEditora = await responseEditora.json();
+    } catch (error) {
+        console.error('Erro ao buscar editora:', error);
+        return;
+    }
+
+    let jsonAutor;
+    try {
+        const responseAutor = await fetch('/api/autores/' + txtAutor.value, {
+            method: 'GET',
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
+        jsonAutor = await responseAutor.json();
+    } catch (error) {
+        console.error('Erro ao buscar autor:', error);
+        return;
+    }
+
+    const requestBody = JSON.stringify({
+        'id': txtId.value,
+        'titulo': txtTitulo.value,
+        'ano': txtAno.value,
+        'publicoAlvo': txtPublicoAlvo.value,
+        'genero': txtGenero.value,
+        'editora': jsonEditora,
+        'autor': jsonAutor
+    });
+
+        fetch('/api/livros/' + txtId.value, {
+            method: 'PUT',
+            body: requestBody,
+            headers: {
+            	'Content-type': 'application/json',
+            	'Authorization': 'Bearer ' + token
+            }
+        })
+        .then(resposta => { if (!resposta.ok) throw Error(resposta.status); return resposta; } )
+        .then(resposta => resposta.json())
+        .then(json => inicializar())
+        .catch(function(error) {
+            paragrafoMensagem.innerHTML = "Erro ao alterar livro (código " + error.message + ")";
+        });         
+    
+}
+
+function cancelarEdicao() {
+	inicializar();
+}
+
+function selecionarLivro(id, titulo, publicoAlvo, ano, editora, genero, autor) {
+    paragrafoMensagem.innerHTML = 'Altere e salve os dados do livro, ou então apague o registro do livro.'
+    txtId.value = id;
+    txtTitulo.value = titulo;
+    txtAno.value = ano;
+    txtPublicoAlvo.value = publicoAlvo;
+    txtGenero.value = genero;
+    txtEditora.value= editora;
+    txtAutor = autor;
+    txtTitulo.disabled = false;
+    txtAno.disabled = false;
+    txtPublicoAlvo.disabled = false;
+    btnNovo.disabled = true;
+    btnSalvar.disabled = false;
+    btnApagar.disabled = false;
+    btnCancelar.disabled = false; 
+}
+
+async function apagarLivro() {
+	fetch('/api/livros/' + txtId.value, {
+        method: 'DELETE',
+        headers: {'Authorization': 'Bearer ' + token }
+    })
+    .then(resposta => { if (!resposta.ok) throw Error(resposta.status); return resposta; } )
+    .then(resposta => inicializar())
+    .catch(function(error) {
+        paragrafoMensagem.innerHTML = "Erro ao apagar livro (código " + error.message + ")";
+    });
+}
+
+function logout() {
+	localStorage.removeItem('token');
+	window.location.replace("/html/login.html");
+}
+
+        </script>
+	</body>
+</html>	        
